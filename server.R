@@ -2,7 +2,7 @@
 library(shiny)
 library(ggmap)
 
-library(ggmap)
+library(ggplot2)
 
 #Nacteni dat
 kontroly <- read.csv("data/kontroly.csv", sep=",", header = TRUE, fileEncoding = "UTF-8")
@@ -20,17 +20,21 @@ names(souradnice)[1] <- "NUTS5"
 data <-merge(data, souradnice, by.x="NUTS.5", by.y="NUTS5")
 
 #zaklad mapy CR
-theme_set(theme_bw(16))
-CzMap <- qmap("czech republic", zoom = 7, color = "bw")
+cz_lok <- get_googlemap("czech republic", zoom = 7, color = "bw", size = c(640, 420), scale = 2)
+CZMap <- ggmap(cz_lok, legend="none", extent = "device", maprange = TRUE)
 
 shinyServer(
   function(input, output) {
     
-    # output$selected_time <- reactive({input$time})
+    #output$selected_time <- reactive({input$time})
+    points_data <- reactive({
+      subset(data, as.Date(Datum.kontroly, format="%d. %m. %Y") == as.Date(input$time))
+    })
+    
     
     output$map <- renderPlot({
-      CzMap + geom_point(aes(x = Longitude, y = Latitude, colour = Zakon, size = Vyse.pokuty),
-                         data = data)
+      CZMap + geom_point(aes(x = Longitude, y = Latitude, colour = Zakon, size = Vyse.pokuty),
+                         data = points_data()) + theme(legend.position = "none")
     })
     
     
