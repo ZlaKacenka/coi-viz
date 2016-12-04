@@ -12,12 +12,14 @@ shinyUI(fluidPage(
       sliderInput("time", 
                   label = "Mapa ke dni:",
                   timeFormat = "%d. %m. %Y",
-                  min = as.Date("2013-01-01"), max = as.Date("2015-09-09"), value = as.Date("2013-01-01"),
-                  animate = animationOptions(loop = TRUE, interval = 100)),
+                  min = as.Date("2012-01-01"), max = as.Date("2015-09-09"), value = as.Date("2012-01-01"),
+                  animate = animationOptions(loop = TRUE, interval = 1000)),
       
-      p("Legenda:"),
-      p("velikost kulicek"),
-      p("barva kulicek")
+      p("Legenda:", fluidRow(
+        splitLayout(cellWidths = c("50%", "50%"), plotOutput("legend_fine"), plotOutput("legend_law"))
+      ))
+      #p("velikost kulicek"),
+      #p("barva kulicek")
     ),
     
     
