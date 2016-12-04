@@ -7,7 +7,6 @@ shinyUI(fluidPage(
   
   sidebarLayout(
     sidebarPanel(
-      tags$head(tags$style("#map{height:100vh !important;}")),
       helpText("Mapa zobrazuje..."),
       
       p("Puvodni data:", a("COI", href = "http://www.coi.cz/cz/spotrebitel/otevrena-data/")),
