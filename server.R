@@ -49,7 +49,7 @@ data$Vyse.pokuty[is.na(data$Vyse.pokuty)] <- 300
 data$Zakon <- factor(data$Zakon)
 customColorPalette <- colorRampPalette(brewer.pal(12, 'Paired'))(length(unique(data$Zakon)))
 names(customColorPalette) <- levels(data$Zakon)
-customColorScale <- scale_color_manual(name="Zákon", values=customColorPalette)
+customColorScale <- scale_color_manual(name="Zákon", values=customColorPalette, guide = FALSE)
 
 #zaklad mapy CR
 cz_lok <- get_googlemap("czech republic", zoom = 7, color = "bw", size = c(640, 420), scale = 1)
@@ -73,23 +73,21 @@ shinyServer(
    
     output$map <- renderPlot({
       plot <- CZMap + geom_point(aes(x = Longitude, y = Latitude, colour = Zakon, size = Vyse.pokuty, alpha = alfa), data = points_data())
-      plot <- plot + theme(legend.position = "none") + customColorScale + scale_size_area(name="Výše pokuty", trans="sqrt", limits=range(data$Vyse.pokuty), max_size=20)
+      plot <- plot + theme(legend.position = "bottom") + customColorScale + scale_alpha_continuous(guide = FALSE) +  scale_size_area(name="Výše pokuty", trans="sqrt", limits=range(data$Vyse.pokuty), max_size=20)
       return(plot)
-    })
+    }, width="auto", height="auto")
     
-    output$legend_fine <- renderPlot({
+    output$legend_law <- renderText({
+      
       plot <- ggplot(data) + geom_point(aes(x = Longitude, y = Latitude, colour = Zakon, size = Vyse.pokuty, alpha = alfa), data = data)
       plot <- plot + customColorScale + scale_size_area(name="Výše pokuty", limits=range(data$Vyse.pokuty), max_size=40)
-      return(plot(legend[5]))
+      g <- ggplot_build(plot)
+      legend_colours <- data.frame(colours = customColorPalette,# unique(g$data[[1]]["colour"]), 
+                                   label = levels(g$plot$data[, g$plot$labels$colour]))
+      fun <- function(row){sprintf('<div class="legend_item"><div class="box" style="background: %s"></div><div class="legend_label">%s</div></div>', row$colour, row$label)}
+      rows <- split(legend_colours, seq(nrow(legend_colours)))
+      paste(lapply(rows, fun), collapse='')
     })
-    
-    output$legend_law <- renderPlot({
-      plot <- ggplot(data) + geom_point(aes(x = Longitude, y = Latitude, colour = Zakon, size = Vyse.pokuty, alpha = alfa), data = data)
-      plot <- plot + customColorScale + scale_size_area(name="Výše pokuty", limits=range(data$Vyse.pokuty), max_size=40)
-      return(plot(legend[7]))
-    })
-    
-    
       
   }
 )
