@@ -7,7 +7,7 @@ shinyUI(fluidPage(
   
   sidebarLayout(
     sidebarPanel(
-      helpText("Mapa zobrazuje..."),
+      helpText("Mapa zobrazuje kontroly "),
       
       p("Puvodni data:", a("COI", href = "http://www.coi.cz/cz/spotrebitel/otevrena-data/")),
       
@@ -17,17 +17,12 @@ shinyUI(fluidPage(
                   min = as.Date("2012-01-01"), max = as.Date("2015-09-09"), value = as.Date("2012-01-01"),
                   animate = animationOptions(loop = TRUE, interval = 1000)),
       
-      #p("Legenda:"),
       withTags({
         div(class="legend",
-          #div(class="left_column",
               p("Barevná legenda:"),
               htmlOutput("legend_law")
-          #)
         )
       })
-      #p("velikost kulicek"),
-      #p("barva kulicek")
     ),
     
     

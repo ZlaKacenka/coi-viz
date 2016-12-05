@@ -6,7 +6,7 @@ library(ggplot2)
 library(RColorBrewer)
 library(gridExtra)
 
-#Nacteni dat
+#nacteni dat
 kontroly <- read.csv("data/kontroly.csv", sep=",", header = TRUE, fileEncoding = "UTF-8")
 kontroly$Id.kontroly <- as.character(kontroly$Id.kontroly)
 
@@ -14,9 +14,11 @@ sankce <- read.csv("data/sankce.csv", sep=",", header = TRUE, fileEncoding = "UT
 sankce$ID.kontroly <- as.character(sankce$ID.kontroly)
 
 data <- merge(kontroly, sankce, by.x="Id.kontroly", by.y="ID.kontroly", all.x = TRUE)
-#data[is.na(data$Vyse.pokuty),]$Vyse.pokuty <- 100
 data$Zakon <- as.character(data$Zakon)
 data$Zakon[is.na(data$Zakon)] <- "kontrola"
+
+#data2 <- subset(data, data$IC.subjektu == "28220854")
+data$Zakon[data$Id.kontroly=="211503260034701"] <- "zak. 22/1997"
 
 souradnice <- read.csv("data/souradnice.csv", sep=",", header = TRUE, fileEncoding = "UTF-8")
 souradnice <- souradnice[c(2,8,9)]
@@ -24,32 +26,15 @@ names(souradnice)[1] <- "NUTS5"
 
 data <-merge(data, souradnice, by.x="NUTS.5", by.y="NUTS5")
 
-#zakladni nastaveni alfy
+#zakladni nastaveni alfy a velikosti
 data$alfa <- 0.9
-
-#nastaveni barev
-#data$color <- data$Zakon
-#zak <- unique(data$color)
-#col <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7",  "#D95EC0", "#CC32A2",
-#         "#959595", "#E99A03", "#56D4E8", "#059E33", "#F0D544", "#0372B9", "#D73E01", "#CC76D7",  "#B95EC6", "#C132C2",
-#         "#818181", "#E99A09", "#36D4E4")
-#data$color <- mapvalues(data$color, from=zak, to=col)
-
-#nastaveni velikosti
-#data$velikost <- data$Vyse.pokuty
-#vyse <- unique(data$velikost)
-# vyplneni NA
-#data$velikost[is.na(data$velikost)] <- 0
-#data$velikost <- as.integer(((data$velikost-min(data$velikost))/(max(data$velikost)-min(data$velikost)))*1000)
-# vychozi hodnota pro kontroly
-#data$velikost[data$velikost == 0] <- 10
 data$Vyse.pokuty[is.na(data$Vyse.pokuty)] <- 300
 
-# factor potreba pro jednoznacene určení barvy napric daty
+#factor potreba pro jednoznacene urcene barvy napric daty
 data$Zakon <- factor(data$Zakon)
 customColorPalette <- colorRampPalette(brewer.pal(12, 'Paired'))(length(unique(data$Zakon)))
 names(customColorPalette) <- levels(data$Zakon)
-customColorScale <- scale_color_manual(name="Zákon", values=customColorPalette, guide = FALSE)
+customColorScale <- scale_color_manual(name="Zakon", values=customColorPalette, guide = FALSE)
 
 #zaklad mapy CR
 cz_lok <- get_googlemap("czech republic", zoom = 7, color = "bw", size = c(640, 420), scale = 1)
@@ -70,20 +55,17 @@ shinyServer(
       return(datasubset)
     })
     
-   
     output$map <- renderPlot({
       plot <- CZMap + geom_point(aes(x = Longitude, y = Latitude, colour = Zakon, size = Vyse.pokuty, alpha = alfa), data = points_data())
-      plot <- plot + theme(legend.position = "bottom") + customColorScale + scale_alpha_continuous(guide = FALSE) +  scale_size_area(name="Výše pokuty", trans="sqrt", limits=range(data$Vyse.pokuty), max_size=20)
+      plot <- plot + theme(legend.position = "bottom") + customColorScale + scale_alpha_continuous(guide = FALSE) +  scale_size_area(name="Vyse pokuty", limits=range(data$Vyse.pokuty), max_size=20, breaks=c(2000, 15000, 200000, 1000000), trans="sqrt", labels= c("2000", "15 000", "200 000", "1 000 000"))
       return(plot)
     }, width="auto", height="auto")
     
     output$legend_law <- renderText({
-      
       plot <- ggplot(data) + geom_point(aes(x = Longitude, y = Latitude, colour = Zakon, size = Vyse.pokuty, alpha = alfa), data = data)
-      plot <- plot + customColorScale + scale_size_area(name="Výše pokuty", limits=range(data$Vyse.pokuty), max_size=40)
+      plot <- plot + customColorScale + scale_size_area(name="Vyse pokuty", limits=range(data$Vyse.pokuty), max_size=40)
       g <- ggplot_build(plot)
-      legend_colours <- data.frame(colours = customColorPalette,# unique(g$data[[1]]["colour"]), 
-                                   label = levels(g$plot$data[, g$plot$labels$colour]))
+      legend_colours <- data.frame(colours = customColorPalette,label = levels(g$plot$data[, g$plot$labels$colour]))
       fun <- function(row){sprintf('<div class="legend_item"><div class="box" style="background: %s"></div><div class="legend_label">%s</div></div>', row$colour, row$label)}
       rows <- split(legend_colours, seq(nrow(legend_colours)))
       paste(lapply(rows, fun), collapse='')
