@@ -17,6 +17,11 @@ shinyUI(fluidPage(
                   min = as.Date("2012-01-01"), max = as.Date("2015-09-09"), value = as.Date("2012-01-01"),
                   animate = animationOptions(loop = TRUE, interval = 1000)),
       
+      radioButtons("plot_type", "Typ vizualizace",
+                   choices = c("pokuty a kontroly" = "scatter",
+                               "pouze kontroly" = "heatmap"),
+                   inline = TRUE, width = "100%"),
+      
       withTags({
         div(class="legend",
               p("Barevná legenda:"),
@@ -26,7 +31,9 @@ shinyUI(fluidPage(
     ),
     
     
-    mainPanel(plotOutput("map", width = "100%")
+    mainPanel(
+      plotOutput("map", width = "100%"),
+      plotOutput("heatmap", width = "100%")
     )
   )
 ))
