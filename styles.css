@@ -1,0 +1,57 @@
+.box {
+  width: 10px;
+  height: 10px;
+  margin: 5px;
+  border: 1px solid rgba(0, 0, 0, .2);
+  float: left;
+}
+
+
+.legend_item {
+  height: 20px;
+  vertical-align: middle;
+}
+
+.legend_label {
+  line-height:20px;
+  float: left
+}
+
+.left_column {
+  float: left;
+}
+
+.right_column {
+  float: right;
+}
+
+.legend {
+  height:100vh !important;
+  text-align: center;
+}
+
+
+#map {
+  height:100vh !important;
+  opacity: 1;
+  -webkit-transition: all .6s ease-in-out;
+  -moz-transition: all .6s ease-in-out;
+  -o-transition: all .6s ease-in-out;
+  -ms-transition: all .6s ease-in-out;
+  transition: all .6s ease-in-out;
+}
+
+#map img {
+  opacity: 1;
+  -webkit-transition: all .6s ease-in-out;
+  -moz-transition: all .6s ease-in-out;
+  -o-transition: all .6s ease-in-out;
+  -ms-transition: all .6s ease-in-out;
+  transition: all .6s ease-in-out;
+}
+
+#legend_law {
+  -moz-column-count: 2;
+  -webkit-column-count: 2;
+  column-count: 2;
+}
