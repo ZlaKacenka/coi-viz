@@ -22,6 +22,13 @@ shinyUI(fluidPage(
                                "pouze kontroly" = "heatmap"),
                    inline = TRUE, width = "100%"),
       
+      radioButtons("map_type", "Typ mapy",
+                   choices = c("silnicni" = "roadmap",
+                               "satelitni" = "satellite",
+                               "terenni" = "terrain",
+                               "hybridni" = "hybrid"),
+                   inline = TRUE, width = "100%"),
+      
       withTags({
         div(class="legend",
               p("Barevná legenda:"),

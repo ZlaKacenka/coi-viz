@@ -41,8 +41,8 @@ names(customColorPalette) <- levels(data$Zakon)
 customColorScale <- scale_color_manual(name="Zakon", values=customColorPalette, guide = FALSE)
 
 #zaklad mapy CR
-cz_lok <- get_googlemap("czech republic", zoom = 7, color = "bw", maptype = "roadmap", size = c(640, 420), scale = 1)
-CZMap <- ggmap(cz_lok, legend="none", extent = "device", maprange = TRUE)
+#cz_lok <- get_googlemap("czech republic", zoom = 7, color = "bw", maptype = "roadmap", size = c(640, 420), scale = 1)
+#CZMap <- ggmap(cz_lok, legend="none", extent = "device", maprange = TRUE)
 
 # konverze na data.table pro maximalni rychlost
 DT <- as.data.table(data)
@@ -64,7 +64,7 @@ shinyServer(
     
     get_bubble_scatter_plot <- function(startDate) {
       current_points <- points_data(startDate, startDate-3)
-      plot <- CZMap + 
+      plot <- CZMap() + 
         geom_point(aes(x = Longitude, y = Latitude, colour = Zakon, size = Vyse.pokuty, alpha = alfa), data = current_points) +
         theme(legend.position = "bottom") + customColorScale + scale_alpha_continuous(guide = FALSE) + 
         scale_size_area(name="Vyse pokuty", limits=range(data$Vyse.pokuty), max_size=20, breaks=c(2000, 15000, 200000, 1000000), trans="sqrt", labels= c("2000", "15 000", "200 000", "1 000 000"))
@@ -73,7 +73,7 @@ shinyServer(
     
     get_heatmap <- function(startDate) {
       current_points <- heat_data(startDate, startDate-3)
-      plot <- CZMap + 
+      plot <- CZMap() + 
         stat_density_2d(
           data=current_points,
           aes(x=Longitude, y=Latitude, fill=..level.., alpha=..level..),
@@ -90,8 +90,26 @@ shinyServer(
       return(plot)
     }
     
+    CZMap <- reactive({
+      if (input$map_type == 'roadmap') {
+        cz_lok <- get_googlemap("czech republic", zoom = 7, color = "bw", maptype = "roadmap", size = c(640, 420), scale = 1)
+        CZMap <- ggmap(cz_lok, legend="none", extent = "device", maprange = TRUE)
+      } else if (input$map_type == 'satellite') {
+        cz_lok <- get_googlemap("czech republic", zoom = 7, color = "bw", maptype = "satellite", size = c(640, 420), scale = 1)
+        CZMap <- ggmap(cz_lok, legend="none", extent = "device", maprange = TRUE)
+      } else if (input$map_type == 'terrain') {
+        cz_lok <- get_googlemap("czech republic", zoom = 7, color = "bw", maptype = "terrain", size = c(640, 420), scale = 1)
+        CZMap <- ggmap(cz_lok, legend="none", extent = "device", maprange = TRUE)
+      } else {
+        cz_lok <- get_googlemap("czech republic", zoom = 7, color = "bw", maptype = "hybrid", size = c(640, 420), scale = 1)
+        CZMap <- ggmap(cz_lok, legend="none", extent = "device", maprange = TRUE)
+      }
+       
+    })
+    
     output$map <- renderPlot({
       startDate <- as.Date(input$time)
+      
       if (input$plot_type == 'scatter') {
         get_bubble_scatter_plot(startDate)
       } else {
